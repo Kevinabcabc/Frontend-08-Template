@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>五子棋</title>
+  <style>
+    body {
+      background: #dedede;
+    }
+    #chessBox {
+      width: 500px;
+      height: 500px;
+      position: relative;
+      margin: 100px;
+    }
+    #back {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    #back span {
+      display: inline-block;
+      vertical-align: middle;
+      height: 50px;
+      width: 50px;
+      box-sizing: border-box;
+      border: 1px solid #dedede;
+      background: yellowgreen;
+    }
+    #pieces {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    #pieces span {
+      position: absolute;
+      height: 36px;
+      width: 36px;
+      border-radius: 50%;
+      z-index: 2;
+    }
+  </style>
+</head>
+<body>
+  <div id="chessBox">
+    <div id="back"></div>
+    <div id='pieces'></div>
+  </div>
+
+  <script>
+    const chessBack = document.getElementById('back');
+    const pieces = document.getElementById('pieces');
+
+    const piecesData = [
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ];
+
+    // 1 黑 2 白
+    let nowPiece = 1;
+
+    const checklines = (x, y) => {
+      return [
+        [{x: x, y: y}, {x: x + 1, y: y}, {x: x + 2, y: y}, {x: x + 3, y: y}, {x: x + 4, y: y}],
+        [{x: x - 1, y: y}, {x: x, y: y}, {x: x + 1, y: y}, {x: x + 2, y: y}, {x: x + 3, y: y}],
+        [{x: x - 2, y: y}, {x: x - 1, y: y}, {x: x, y: y}, {x: x + 1, y: y}, {x: x + 2, y: y}],
+        [{x: x - 3, y: y}, {x: x - 2, y: y}, {x: x - 1, y: y}, {x: x, y: y}, {x: x + 1, y: y}],
+        [{x: x - 4, y: y}, {x: x - 3, y: y}, {x: x - 2, y: y}, {x: x - 1, y: y}, {x: x, y: y}],
+
+        [{x: x, y: y}, {x: x, y: y + 1}, {x: x, y: y + 2}, {x: x, y: y + 3}, {x: x, y: y + 4}],
+        [{x: x, y: y - 1}, {x: x, y: y}, {x: x, y: y + 1}, {x: x, y: y + 2}, {x: x, y: y + 3}],
+        [{x: x, y: y - 2}, {x: x, y: y - 1}, {x: x, y: y}, {x: x, y: y + 1}, {x: x, y: y + 2}],
+        [{x: x, y: y - 3}, {x: x, y: y - 2}, {x: x, y: y - 1}, {x: x, y: y}, {x: x, y: y + 1}],
+        [{x: x, y: y - 4}, {x: x, y: y - 3}, {x: x, y: y - 2}, {x: x, y: y - 1}, {x: x, y: y}],
+
+        [{x: x, y: y}, {x: x + 1, y: y + 1}, {x: x + 2, y: y + 2}, {x: x + 3, y: y + 3}, {x: x + 4, y: y + 4}],
+        [{x: x - 1, y: y - 1}, {x: x, y: y}, {x: x + 1, y: y + 1}, {x: x + 2, y: y + 2}, {x: x + 3, y: y + 3}],
+        [{x: x - 2, y: y - 2}, {x: x - 1, y: y - 1}, {x: x, y: y}, {x: x + 1, y: y + 1}, {x: x + 2, y: y + 2}],
+        [{x: x - 3, y: y - 3}, {x: x - 2, y: y - 2}, {x: x - 1, y: y - 1}, {x: x, y: y}, {x: x + 1, y: y + 1}],
+        [{x: x - 4, y: y - 4}, {x: x - 3, y: y - 3}, {x: x - 2, y: y - 2}, {x: x - 1, y: y - 1}, {x: x, y: y}],
+
+        [{x: x, y: y}, {x: x + 1, y: y - 1}, {x: x + 2, y: y - 2}, {x: x + 3, y: y - 3}, {x: x + 4, y: y - 4}],
+        [{x: x - 1, y: y + 1}, {x: x, y: y}, {x: x + 1, y: y - 1}, {x: x + 2, y: y - 2}, {x: x + 3, y: y - 3}],
+        [{x: x - 2, y: y + 2}, {x: x - 1, y: y + 1}, {x: x, y: y}, {x: x + 1, y: y - 1}, {x: x + 2, y: y - 2}],
+        [{x: x - 3, y: y + 3}, {x: x - 2, y: y + 2}, {x: x - 1, y: y + 1}, {x: x, y: y}, {x: x + 1, y: y - 1}],
+        [{x: x - 4, y: y + 4}, {x: x - 3, y: y + 3}, {x: x - 2, y: y + 2}, {x: x - 1, y: y + 1}, {x: x, y: y}],
+      ];
+    }
+
+    // 画棋盘
+    for (let i = 0; i < 100; i ++) {
+      const backPiece = document.createElement('span');
+      chessBack.appendChild(backPiece);
+    }
+
+    const andTheWinerIs = (x, y, n, d) => {
+      let onlyNowPieceData = d.map(item => {
+        return item.map(o => {
+          return o === n ? o : 0;
+        });
+      });
+
+      let alreadyWin = false;
+      console.log(onlyNowPieceData);
+      checklines(x, y).forEach(subject => {
+        let winGame = true;
+        subject.forEach(term => {
+          if (!onlyNowPieceData[term.x] || !onlyNowPieceData[term.x][term.y]) {
+            winGame = false;
+          } else if (onlyNowPieceData[term.x][term.y] !== n) {
+            winGame = false;
+          }
+        });
+        if (winGame) {
+          alreadyWin = true;
+        }
+      });
+      return alreadyWin;
+    }
+
+    const goChess = (x, y, dom) => {
+      if (piecesData[x][y]) {
+        window.alert('你不能下这里哦');
+        return void 0;
+      }
+      piecesData[x][y] = nowPiece;
+      dom.style.background = nowPiece === 1 ? 'black' : 'white';
+      let winStatus =  andTheWinerIs(x, y, nowPiece, piecesData);
+      if (winStatus) {
+        setTimeout(() => {
+          window.alert( `${nowPiece !== 1 ? 'black' : 'white'} win` );
+        }, 0);
+      }
+      console.log('??', winStatus);
+      nowPiece = 3 - nowPiece;
+    }
+
+    // 画所有透明棋子
+    for (let x = 0; x <= 10; x++) {
+      for (let y = 0; y <= 10; y++) {
+        const piece = document.createElement('span');
+        piece.style.top = x * 50 - 18 + 'px';
+        piece.style.left = y * 50 -18 + 'px';
+        piece.addEventListener('click', () => {
+          goChess(x, y, piece);
+        });
+        pieces.appendChild(piece);
+      }
+    }
+  </script>
+</body>
+</html>

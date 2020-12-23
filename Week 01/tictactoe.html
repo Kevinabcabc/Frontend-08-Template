@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TicTacToe</title>
+  <style>
+    body {
+      background: skyblue;
+    }
+    #chessBox {
+      margin-top: 30px;
+      margin-left: calc(50% - 150px);
+      margin-top: 150px;
+      margin-bottom: 50px;
+      width: 300px;
+    }
+    #chessBox div {
+      height: 100px;
+      width: 100px;
+      display: inline-block;
+      box-sizing: border-box;
+      vertical-align: middle;
+      line-height: 100px;
+      text-align: center;
+      background: wheat;
+      border: 1px solid skyblue;
+      color: #333;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="chessBox"></div>
+  <div id="infoBox">info: --</div>
+  <script>
+    const chessBox = document.getElementById('chessBox');
+    const infoBox = document.getElementById('infoBox');
+
+    // 1为O 2为X
+    let currentChess = 1;
+
+    let ticks = [
+      0, 0, 0,
+      0, 0, 0,
+      0, 0, 0,
+    ];
+
+    let gameOver = false;
+
+    const renderInfo = (info) => {
+      infoBox.innerHTML = `info: ${info}`;
+    }
+
+    const checkWinner = (tickData) => {
+      if (gameOver) {
+        return void 0;
+      }
+      try {
+        for (let x = 0; x < 3; x++) {
+          let hasWinner = true;
+          for (let y = 0; y < 3; y++) {
+            if (ticks[x + y * 3] !== currentChess) {
+              hasWinner = false
+            }
+          }
+          if (hasWinner) {
+            gameOver = true;
+            throw new Error(`winner is: ${currentChess === 1 ? 'O' : 'X'}`);
+          }
+        }
+      } catch(err) {
+        renderInfo(err);
+        return void 0;
+      }
+
+      try {
+        for (let y = 0; y < 3; y++) {
+          let hasWinner = true;
+          for (let x = 0; x < 3; x++) {
+            if (ticks[x + y * 3] !== currentChess) {
+              hasWinner = false
+            }
+          }
+          if (hasWinner) {
+            gameOver = true;
+            throw new Error(`winner is: ${currentChess === 1 ? 'O' : 'X'}`);
+          }
+        }
+      } catch(err) {
+        renderInfo(err);
+        return void 0;
+      }
+
+      try {
+        let hasWinner = true;
+        for (let x = 0; x < 3; x++) {
+          for (let y = 0; y < 3; y++) {
+            if (x === y && ticks[x + y * 3] !== currentChess) {
+              hasWinner = false
+            }
+          }
+        }
+        if (hasWinner) {
+          gameOver = true;
+          throw new Error(`winner is: ${currentChess === 1 ? 'O' : 'X'}`);
+        }
+      } catch(err) {
+        renderInfo(err);
+        return void 0;
+      }
+
+      try {
+        let hasWinner = true;
+        for (let x = 0; x < 3; x++) {
+          for (let y = 0; y < 3; y++) {
+            if ((2 - x) === y && ticks[x + y * 3] !== currentChess) {
+              hasWinner = false
+            }
+          }
+        }
+        if (hasWinner) {
+          gameOver = true;
+          throw new Error(`winner is: ${currentChess === 1 ? 'O' : 'X'}`);
+        }
+      } catch(err) {
+        renderInfo(err);
+        return void 0;
+      }
+    }
+  
+    const renderChesses = () => {
+      chessBox.innerHTML = "";
+      ticks.forEach((element, index) => {
+        const chessPiece = document.createElement('div');
+        if (element === 1) {
+          chessPiece.innerHTML = 'O';
+        } else if (element === 2) {
+          chessPiece.innerHTML = 'X';
+        }
+        chessPiece.addEventListener('click', () => {
+          if (gameOver) {
+            window.alert('game over');
+            return void 0;
+          }
+          if (element) {
+            window.alert('已选择');
+            return void 0;
+          }
+          ticks[index] = currentChess;
+          renderChesses();
+          checkWinner([...ticks]);
+          currentChess = 3 - currentChess;
+        });
+        chessBox.appendChild(chessPiece);
+      });
+    }
+
+    renderChesses(ticks);
+
+  </script>
+  
+</body>
+</html>
