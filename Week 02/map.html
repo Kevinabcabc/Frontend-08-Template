@@ -32,17 +32,12 @@
 </head>
 <body>
   <div id="container"></div>
-  <!-- <div id="heap">
-    <div class="line">
-      <div class="item">1</div>
-    </div>
-  </div> -->
   <button onclick="localStorage['map'] = JSON.stringify(mapData); window.location.reload();">save</button>
   <button onclick="localStorage.removeItem('map'); window.location.reload();">clear</button>
+  <div>寻路代码案例: findWays(mapData, [10,6], [90,50])</div>
   <script>
     let mapData = localStorage['map'] ? JSON.parse(window.localStorage['map']) : new Array(10000).fill(0);
     const container = document.getElementById('container');
-    // const heap = document.getElementById('heap');
 
     let write = false;
     let clear = false;
@@ -55,13 +50,6 @@
     const getDistance = (start, end) => {
       return (end[0] - start[0]) ** 2 + (end[1] - start[1]) ** 2;
     }
-
-    // const renderHeap = (arr = []) => {
-    //   let dataCopy = JSON.parse(JSON.stringify(arr));
-    //   for (let i = 0; dataCopy.length; i++) {
-    //     let line = document.createElement('div');
-    //   }
-    // }
 
     const renderMap = () => {
       container.innerHTML = "";
@@ -172,7 +160,10 @@
           const min = this.data[0];
           this.swap(this.data, 0, this.data.length - 1);
           this.data.pop();
-          this.siftDown(0);
+          // this.siftDown(0);
+          for (let i = this.data.length - 1; i >= 0; i--) {
+            this.siftDown(i);
+          }
           return min;
         }
       }
@@ -202,9 +193,9 @@
     const findWays = async (data, start, end) => {
       let table = JSON.parse(JSON.stringify(mapData));
       // 非二叉树堆
-      // let queue = new DemoTree([start], end);
+      let queue = new DemoTree([start], end);
       // 二叉树堆
-      let queue = new MinHeap([start], end);
+      // let queue = new MinHeap([start], end);
 
       const insert = async (x, y, pre) => {
         if (x < 0 || x >= 100 || y < 0 || y >= 100) {
@@ -246,7 +237,6 @@
         await insert(x+1, y-1, [x, y]);
       }
     }
-
   </script>
 </body>
 </html>
