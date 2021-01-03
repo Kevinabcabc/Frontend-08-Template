@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>map</title>
+  <style>
+    #container {
+      height: 600px;
+      width: 600px;
+      display: flex;
+      flex-wrap: wrap;
+      border: 1px solid #666;
+    }
+    .dotItem {
+      height: 6px;
+      width: 6px;
+      box-sizing: border-box;
+      border: 1px solid #dfdfdf;
+    }
+    #heap {
+      width: 1000px;
+      height: 600px;
+    }
+    .line {
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+    }
+  </style>
+</head>
+<body>
+  <div id="container"></div>
+  <!-- <div id="heap">
+    <div class="line">
+      <div class="item">1</div>
+    </div>
+  </div> -->
+  <button onclick="localStorage['map'] = JSON.stringify(mapData); window.location.reload();">save</button>
+  <button onclick="localStorage.removeItem('map'); window.location.reload();">clear</button>
+  <script>
+    let mapData = localStorage['map'] ? JSON.parse(window.localStorage['map']) : new Array(10000).fill(0);
+    const container = document.getElementById('container');
+    // const heap = document.getElementById('heap');
+
+    let write = false;
+    let clear = false;
+
+    const sleep = (t) => {
+      return new Promise((resolve) => {
+        setTimeout(() => {resolve()}, t);
+      });
+    }
+    const getDistance = (start, end) => {
+      return (end[0] - start[0]) ** 2 + (end[1] - start[1]) ** 2;
+    }
+
+    // const renderHeap = (arr = []) => {
+    //   let dataCopy = JSON.parse(JSON.stringify(arr));
+    //   for (let i = 0; dataCopy.length; i++) {
+    //     let line = document.createElement('div');
+    //   }
+    // }
+
+    const renderMap = () => {
+      container.innerHTML = "";
+      for (let y = 0; y < 100; y++) {
+        for (let x = 0; x < 100; x++) {
+          let dot = document.createElement('div');
+          dot.classList = `dotItem item-${x}-${y}`;
+          if (mapData[y * 100 + x] === 1) {
+            dot.style.background = 'black';
+          }
+          if (mapData[y * 100 + x] === 2) {
+            dot.style.background = 'yellow';
+          }
+          dot.addEventListener('mouseover', () => {
+            if (write) {
+              dot.style.background = 'black';
+              mapData[y * 100 + x] = 1;
+            } 
+            if (clear) {
+              dot.style.background = 'white';
+              mapData[y * 100 + x] = 0;
+            }
+          });
+          dot.addEventListener('mousedown', (e) => {
+            if (e.which === 3) {
+              e.preventDefault();
+              clear = true;
+            } else {
+              write = true;
+            }
+          });
+          dot.oncontextmenu = () => {return false}
+          dot.addEventListener('mouseup', (e) => {
+            write = false;
+            if (e.which === 3) {
+              clear = false;
+            }
+          });
+          container.appendChild(dot);
+        }
+      }
+    }
+    renderMap();
+
+    // 非二叉树堆
+    class DemoTree {
+      constructor(data, end, compare) {
+        this.tree = data;
+        this.end = end;
+        this.compare = compare ? compare : (a,b) => (a-b);
+      }
+      add(n) {
+        this.tree.push(n);
+        let minIndex = 0;
+        let minData = this.tree[0];
+        this.tree.forEach((element, index) => {
+          if (getDistance(element, this.end) < getDistance(this.tree[minIndex], this.end)) {
+            minIndex = index;
+            minData = element;
+          }
+        });
+        this.tree[minIndex] = this.tree[this.tree.length - 1];
+        this.tree[this.tree.length - 1] = minData;
+      }
+      getMin() {
+        return this.tree.pop();
+      }
+    }
+
+    // 二叉堆
+    class MinHeap {
+      constructor(arr = [], end) {
+        this.data = arr;
+        this.end = end;
+        for (let i = arr.length - 1; i >= 0; i--) {
+          this.siftDown(i);
+        }
+      }
+      size() {
+        return this.data.length;
+      }
+      isEmpty() {
+        return !this.data.length;
+      }
+      parent(i) {
+        if (i != 0) {
+          return Math.floor((i - 1)/2)
+        }
+      }
+      leftChild(i) {
+        return i * 2 + 1;
+      }
+      rightChild(i) {
+        return i * 2 + 2;
+      }
+      add(d) {
+        this.data.push(d);
+        this.siftUp(this.data.length - 1);
+      }
+      siftUp(i) {
+        while (i > 0 && getDistance(this.data[this.parent(i)], this.end) > getDistance(this.data[i], this.end)) {
+          this.swap(this.data, i, this.parent(i));
+          i = this.parent(i);
+        }
+      }
+      getMin() {
+        if (this.data.length != 0) {
+          const min = this.data[0];
+          this.swap(this.data, 0, this.data.length - 1);
+          this.data.pop();
+          this.siftDown(0);
+          return min;
+        }
+      }
+      siftDown(i) {
+        // 有子节点才下沉
+        while (this.leftChild(i) < this.data.length) {
+          let j = this.leftChild(i);
+          if (j + 1 < this.data.length && getDistance(this.data[j + 1], this.end) < getDistance(this.data[j], this.end)) {
+            j = this.rightChild(i);
+          }
+
+          if (this.data[i] < this.data[j]) {
+            break;
+          } else {
+            this.swap(this.data, i, j);
+            i = j;
+          }
+        }
+      }
+      swap(arr, o, t) {
+        if (o >= 0 && o < this.data.length && t >= 0 && t < this.data.length) {
+          [arr[o], arr[t]] = [arr[t], arr[o]];
+        }
+      }
+    }
+
+    const findWays = async (data, start, end) => {
+      let table = JSON.parse(JSON.stringify(mapData));
+      // 非二叉树堆
+      // let queue = new DemoTree([start], end);
+      // 二叉树堆
+      let queue = new MinHeap([start], end);
+
+      const insert = async (x, y, pre) => {
+        if (x < 0 || x >= 100 || y < 0 || y >= 100) {
+          return void 0;
+        }
+        if (mapData[y * 100 + x]) {
+          return void 0;
+        }
+        queue.add([x,y]);
+
+        table[y * 100 + x] = pre;
+        mapData[y * 100 + x] = pre;
+        document.getElementsByClassName(`item-${x}-${y}`)[0].style.background = 'yellow';
+        await sleep(1);
+      }
+      
+      while (true) {
+        let d = queue.getMin();
+        if (!d) {return;}
+        let [x, y] = d;
+        
+        if (x === end[0] && y === end[1]) {
+          let path = [];
+          while(x != start[0] || y != start[1]) {
+            await sleep(30);
+            path.push(mapData[y * 100 + x]);
+            [x, y] = mapData[y * 100 + x];
+            document.getElementsByClassName(`item-${x}-${y}`)[0].style.background = 'red';
+          }
+          return path;
+        }
+        await insert(x, y-1, [x, y]);
+        await insert(x-1, y-1, [x, y]);
+        await insert(x-1, y, [x, y]);
+        await insert(x-1, y+1, [x, y]);
+        await insert(x, y+1, [x, y]);
+        await insert(x+1, y+1, [x, y]);
+        await insert(x+1, y, [x, y]);
+        await insert(x+1, y-1, [x, y]);
+      }
+    }
+
+  </script>
+</body>
+</html>
