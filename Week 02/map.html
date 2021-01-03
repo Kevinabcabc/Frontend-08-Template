@@ -160,10 +160,7 @@
           const min = this.data[0];
           this.swap(this.data, 0, this.data.length - 1);
           this.data.pop();
-          // this.siftDown(0);
-          for (let i = this.data.length - 1; i >= 0; i--) {
-            this.siftDown(i);
-          }
+          this.siftDown(0);
           return min;
         }
       }
@@ -171,11 +168,11 @@
         // 有子节点才下沉
         while (this.leftChild(i) < this.data.length) {
           let j = this.leftChild(i);
-          if (j + 1 < this.data.length && getDistance(this.data[j + 1], this.end) < getDistance(this.data[j], this.end)) {
+          if (this.data[this.rightChild(i)] && getDistance(this.data[this.rightChild(i)], this.end) < getDistance(this.data[this.leftChild(i)], this.end)) {
             j = this.rightChild(i);
           }
 
-          if (this.data[i] < this.data[j]) {
+          if (getDistance(this.data[i], this.end) < getDistance(this.data[j], this.end)) {
             break;
           } else {
             this.swap(this.data, i, j);
@@ -193,9 +190,9 @@
     const findWays = async (data, start, end) => {
       let table = JSON.parse(JSON.stringify(mapData));
       // 非二叉树堆
-      let queue = new DemoTree([start], end);
+      // let queue = new DemoTree([start], end);
       // 二叉树堆
-      // let queue = new MinHeap([start], end);
+      let queue = new MinHeap([start], end);
 
       const insert = async (x, y, pre) => {
         if (x < 0 || x >= 100 || y < 0 || y >= 100) {
