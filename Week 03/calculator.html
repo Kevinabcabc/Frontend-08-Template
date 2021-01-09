@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  
+  <script>
+    let regEp = /([0-9\.]+)|([ \t]+)|([\r\n]+)|(\*)|(\/)|(\+)|(\-)/g;
+    let dictionary = ['Number', 'WhiteSpace', 'LineTerminator', '*', '/', '+', '-'];
+    
+    function* tokenize(data) {
+      let result = null;
+      let lastIndex = 0;
+
+      while(true) {
+        lastIndex = regEp.lastIndex;
+        result = regEp.exec(data);
+
+        if (!result) {break;}
+
+        if (regEp.lastIndex - lastIndex > result[0].length) {
+          break;
+        }
+
+        let token = {
+          type: null,
+          value: null,
+        }
+
+        for (let i = 1; i <= dictionary.length; i++) {
+          if (result && result[i]) {
+            token.type = dictionary[i-1];
+          }
+        }
+        token.value = result[0];
+        yield token;
+      }
+      yield ({
+        type: 'EOF',
+      });
+    }
+
+    let source = [];
+
+    for (let token of tokenize('10 + 3 * 3')) {
+      console.log(token);
+      if (token.type !== dictionary[1] && token.type !== dictionary[2]) {
+        source.push(token);
+      }
+    }
+
+    const MultiplicativeExpression = (data) => {
+      if (data[0].type === dictionary[0]) {
+        let node = {
+          type: "MultiplicativeExpression",
+          children: [data[0]],
+        }
+        data[0] = node;
+        return MultiplicativeExpression(data);
+      }
+      if (data[0].type === "MultiplicativeExpression" && data[1] && data[1].type === '*') {
+        let node = {
+          type: "MultiplicativeExpression",
+          operator: '*',
+          children: [],
+        }
+        node.children.push(data.shift());
+        node.children.push(data.shift());
+        node.children.push(data.shift());
+        data.unshift(node);
+        return MultiplicativeExpression(data);
+      }
+      if (data[0].type === "MultiplicativeExpression" && data[1] && data[1].type === '/') {
+        let node = {
+          type: "MultiplicativeExpression",
+          operator: '/',
+          children: [],
+        }
+        node.children.push(data.shift());
+        node.children.push(data.shift());
+        node.children.push(data.shift());
+        data.unshift(node);
+        return MultiplicativeExpression(data);
+      }
+      if (data[0].type === "MultiplicativeExpression") {
+        return data;
+      }
+      return MultiplicativeExpression(data);
+    }
+
+    const AdditiveExpression = (data) => {
+      if (data[0].type === 'MultiplicativeExpression') {
+        let node = {
+          type: 'AdditiveExpression',
+          children: [data[0]],
+        }
+        data[0] = node;
+        return AdditiveExpression(data);
+      }
+      if (data[0].type === 'AdditiveExpression' && data[1] && data[1].type === '+') {
+        let node = {
+          type: "AdditiveExpression",
+          operator: '+',
+          children: [],
+        }
+        node.children.push(data.shift());
+        node.children.push(data.shift());
+        MultiplicativeExpression(data);
+        node.children.push(data.shift());
+        data.unshift(node);
+        return AdditiveExpression(data);
+      }
+      if (data[0].type === 'AdditiveExpression' && data[1] && data[1].type === '-') {
+        let node = {
+          type: "AdditiveExpression",
+          operator: '-',
+          children: [],
+        }
+        node.children.push(data.shift());
+        node.children.push(data.shift());
+        MultiplicativeExpression(data);
+        node.children.push(data.shift());
+        data.unshift(node);
+        return AdditiveExpression(data);
+      }
+      if (data[0].type === 'AdditiveExpression') {
+        return data[0];
+      }
+
+      MultiplicativeExpression(data);
+      return AdditiveExpression(data);
+    }
+
+    const Expression = () => {
+      if (source[0].type === 'Expression') {
+        return source;
+      }
+      if (source[0].type === 'AdditiveExpression' && source[1] && source[1].type === 'EOF') {
+        let node = {
+          type: 'Expression',
+          children: [source.shift(), source.shift()],
+        }
+        source.unshift(node);
+        return node;
+      }
+      AdditiveExpression(source);
+      return Expression(source);
+    }
+    console.log(1, Expression());
+    console.log(2, source);
+  </script>
+</body>
+</html>
