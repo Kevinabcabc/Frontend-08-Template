@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    #dragBox {
+      height: 100px;
+      width: 100px;
+      background: pink;
+      display: inline-block;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text 
+    text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text 
+    text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text 
+    text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text 
+    text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text 
+    text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text 
+    text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text text 
+  </div>
+  <div id="dragBox"></div>
+  <script>
+    const dragBox = document.getElementById('dragBox');
+    const container = document.getElementById('container');
+
+    let base = {
+      x: 0,
+      y: 0,
+    }
+    let ranges = [];
+
+    for (let i = 0; i < container.childNodes[0].textContent.length; i++) {
+      let range = document.createRange();
+      range.setStart(container.childNodes[0],i);
+      range.setEnd(container.childNodes[0],i);
+      ranges.push(range);
+      // console.log(1, range.getBoundingClientRect());
+    }
+
+    const getNearest = (x, y) => {
+      let min = Infinity;
+      let nearest = null;
+      for (const range of ranges) {
+        let rect = range.getBoundingClientRect();
+        let distance = (rect.x - x) ** 2 + (rect.y - y) ** 2;
+        if (distance < min) {
+          min = distance;
+          nearest = range;
+        }
+      }
+      return nearest;
+    }
+
+    dragBox.addEventListener('mousedown', (e) => {
+      let start = {
+        x: e.clientX,
+        y: e.clientY,
+      }
+      console.log(start);
+      const move = (event) => {
+        console.log(event.clientX, event.clientY);
+        let range = getNearest(event.clientX, event.clientY);
+        range.insertNode(dragBox);
+        // dragBox.style.transform = `translate(${base.x + event.clientX - start.x}px, ${base.y + event.clientY - start.y}px)`
+      }
+      const up = (event) => {
+        base = {
+          x: base.x + event.clientX - start.x,
+          y: base.y + event.clientY - start.y,
+        }
+        document.removeEventListener('mouseup', up);
+        document.removeEventListener('mousemove', move);
+      }
+      document.addEventListener('mousemove', move);
+      document.addEventListener('mouseup', up);
+    });
+
+    // 此方法可js注入Node
+    const jsInsertNode = (id) => {
+      const range = document.createRange();
+      let cc = document.getElementById(`${id}`).childNodes[0];
+      range.setStart(cc,0);
+      range.setEnd(cc,0);
+      let a = document.createElement('div');
+      a.style.background = 'black';
+      a.style.width = '500px';
+      a.style.height = '500px';
+      a.style.borderRadius = '50%'; range.insertNode(a);
+      range.detach();
+      range = null;
+    }
+    document.addEventListener('selectstart', (e) => e.preventDefault());
+    // console.log(33, range.insertNode(a));
+    // console.log(33, range.extractContents());
+  </script>
+</body>
+</html>

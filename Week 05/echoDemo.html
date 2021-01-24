@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .colorBox {
+      height: 200px;
+      width: 200px;
+      border-radius: 50%;
+      margin: 30px;
+    }
+  </style>
+</head>
+<body>
+  <input id="r" type="range" min="0" max="255">
+  <input id="g" type="range" min="0" max="255">
+  <input id="b" type="range" min="0" max="255">
+  <div>data: </div>
+  <span id="dataBox">color Data: </span>
+  <div class="colorBox" id="colorBox"></div>
+  <script>
+    let o = {
+      r: 1,
+      g: 1,
+      b: 1,
+    }
+    let callbacks = new Map();
+    let echoReactivities = new Map();
+    let usedEchos = [];
+
+    let echo = (o) => {
+      if (echoReactivities.has(o)) {
+        return echoReactivities.get(o);
+      }
+      const proxy = new Proxy(o, {
+        set(obj, prop, val) {
+          obj[prop] = val;
+          if (callbacks.get(obj)) {
+            if (callbacks.get(obj).get(prop)) {
+              for (let callback of callbacks.get(obj).get(prop)) {
+                callback();
+              }
+            }
+          }
+          return obj[prop];
+        },
+        get(obj, prop) {
+          usedEchos.push([obj, prop]);
+          if (typeof obj[prop] === 'object') {
+            return echo(obj[prop]);
+          }
+          return obj[prop];
+        }
+      });
+
+      echoReactivities.set(o, proxy);
+      return proxy;
+    }
+
+    const effect = (cb) => {
+      usedEchos = [];
+      cb();
+      for (let e of usedEchos) {
+        if (!callbacks.has(e[0])) {
+          callbacks.set(e[0], new Map());
+        }
+        if (!callbacks.get(e[0]).has(e[1])) {
+          callbacks.get(e[0]).set(e[1], []);
+        }
+        callbacks.get(e[0]).get(e[1]).push(cb);
+      }
+    }
+
+    let eo = echo(o); 
+    const dataBox = document.getElementById('dataBox');
+    const colorBox = document.getElementById('colorBox');
+    const r = document.getElementById('r');
+    const g = document.getElementById('g');
+    const b = document.getElementById('b');
+
+    effect(() => {
+      r.value = eo.r;
+      dataBox.innerText = JSON.stringify(eo);
+    });
+    effect(() => {
+      g.value = eo.g;
+      dataBox.innerText = JSON.stringify(eo);
+    });
+    effect(() => {
+      b.value = eo.b;
+      dataBox.innerText = JSON.stringify(eo);
+    });
+    effect(() => {
+      colorBox.style.background = `rgb(${eo.r}, ${eo.g}, ${eo.b})`;
+    });
+    document.getElementById('r').addEventListener('input', e => {
+      eo.r = e.target.value;
+    });
+    document.getElementById('g').addEventListener('input', e => {
+      eo.g = e.target.value;
+    });
+    document.getElementById('b').addEventListener('input', e => {
+      eo.b = e.target.value;
+    });
+
+  </script>
+</body>
+</html>
