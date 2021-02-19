@@ -12,7 +12,7 @@ http.createServer((request, response) => {
     body = Buffer.concat(body).toString();
     console.log('body:', body);
     response.writeHead(200, {'Content-Type': 'text/html'});
-    response.end(' hello world \n')
+    response.end('hello world \n')
   })
 }).listen(8080, () => {
   console.log('server 8080 start');

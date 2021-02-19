@@ -44,3 +44,8 @@
 
 - response 必须分段构造用一个 response parser 来装配
 - response parser 分段处理response text 用状态及分析文本结构
+
+# send 函数总结第五步
+
+- response 的body可能根据content type 有不同的结构因此采用子Parser结构来解决问题
+- 以chunked body parser 为例 使用状态机处理body格式
