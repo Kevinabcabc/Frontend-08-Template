@@ -6,7 +6,127 @@
   <title>Document</title>
 </head>
 <body>
-  <div class="qq" id="id"></div>
-  <script src="./match.js"></script>
+  <div>
+    <div class="sss" id="uu">
+      <div class="class1" id="id"></div>
+    </div>
+    <div id="id2"></div>
+  </div>
+
+  <div class="aa">
+    <div>
+      <div>
+        <div id="bbb"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+
+    /*
+    JS获取DOM元素的方法（8种）
+      通过ID获取（getElementById）
+      通过name属性（getElementsByName）
+      通过标签名（getElementsByTagName）
+      通过类名（getElementsByClassName）
+      通过选择器获取一个元素（querySelector）
+      通过选择器获取一组元素（querySelectorAll）
+      获取html的方法（document.documentElement）
+      document.documentElement是专门获取html这个标签的
+      获取body的方法（document.body）
+      document.body是专门获取body这个标签的。
+    */
+
+    //  此方法仅实现getElementById；
+    //  此方法仅实现 tag、class、id 选择器
+
+
+    const match = (selector, element) => {
+      if (!selector || !element) {
+        throw new Error('error');
+      }
+
+      let domSelectors = selector.split(/[ ]+/);
+
+      let matched = true;
+
+      try {
+        for (let i = 0; i < domSelectors.length; i++) {
+          let currentSelectorString = domSelectors[domSelectors.length - 1 - i];
+          let pattern = /([a-zA-Z0-9]+)|(\#[a-zA-Z0-9]+)|(\.[a-zA-Z0-9]+)/g;
+          let res = currentSelectorString.match(pattern);
+
+          let attrObj = {};
+
+          res.forEach(str => {
+            if (str[0] === '#') {
+              attrObj.id = str;
+            } else if (str[0] === '.') {
+              attrObj.className = str;
+            } else {
+              attrObj.tagName = str;
+            }
+          });
+
+          // console.log(22, attrObj);
+          // 对最后一个dom 属性做处理， 必须完全匹配
+          if (i === 0) {
+            if (attrObj.id) {
+              if (`#${element.id}` !== attrObj.id) {
+                throw new Error('not match id');
+              }
+            }
+            if (attrObj.className) {
+              if (`.${element.className}` !== attrObj.className) {
+                throw new Error('not match className');
+              }
+            }
+            if (attrObj.tagName) {
+              if (element.tagName.toLocaleLowerCase() !== attrObj.tagName) {
+                throw new Error('not match tag');
+              }
+            }
+          } else {
+            let notMatchDom = true;
+            while (notMatchDom) {
+              element = element.parentNode;
+              if (!element) {
+                throw new Error('null element')
+              }
+
+              let allMatch = true;
+
+              if (attrObj.id) {
+                if (`#${element.id}` !== attrObj.id) {
+                  allMatch = false;
+                }
+              }
+              if (attrObj.className) {
+                if (`.${element.className}` !== attrObj.className) {
+                  allMatch = false;
+                }
+              }
+              if (attrObj.tagName) {
+                if (element.tagName.toLocaleLowerCase() !== attrObj.tagName) {
+                  allMatch = false;
+                }
+              }
+
+              if (allMatch) {
+                notMatchDom = false;
+              }
+            }
+          }
+        }
+      } catch (error) {
+        // console.log('error:', error);
+        matched = false;
+      }
+      return matched;
+    }
+    console.log(match('div #uu div#id.class1', document.getElementById('id'))); //true
+    console.log(match('.aa #bbb', document.getElementById('bbb'))); //true
+    console.log(match('.aaa #bbb', document.getElementById('bbb'))); //false
+
+  </script>
 </body>
 </html>
