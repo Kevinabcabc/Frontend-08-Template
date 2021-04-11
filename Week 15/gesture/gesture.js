@@ -123,7 +123,7 @@ export class Recognizer {
       context.isPan = false;
       context.isPress = true;
       context.handler = null;
-      this.dispatcher('press', {});
+      this.dispatcher.dispatch('press', {});
     }, 500);
   }
   
@@ -136,7 +136,7 @@ export class Recognizer {
       context.isPress = false;
       context.isVertical = Math.abs(dx) < Math.abs(dy);
       clearTimeout(context.handler);
-      this.dispatcher('panstart', {
+      this.dispatcher.dispatch('panstart', {
         startX: context.startX,
         startY: context.startY,
         clientX: point.clientX,
@@ -146,7 +146,7 @@ export class Recognizer {
     }
   
     if (context.isPan) {
-      this.dispatcher('pan', {
+      this.dispatcher.dispatch('pan', {
         startX: context.startX,
         startY: context.startY,
         clientX: point.clientX,
@@ -178,7 +178,7 @@ export class Recognizer {
     // px / ms
     if (v > 1.5) {
       context.isFlick = true;
-      this.dispatcher('flick', {
+      this.dispatcher.dispatch('flick', {
         startX: context.startX,
         startY: context.startY,
         clientX: point.clientX,
@@ -192,14 +192,14 @@ export class Recognizer {
     }
 
     if (context.isTap) {
-      this.dispatcher('tap', {});
+      this.dispatcher.dispatch('tap', {});
       clearTimeout(context.handler);
     }
     if (context.isPress) {
-      this.dispatcher('pressend', {});
+      this.dispatcher.dispatch('pressend', {});
     }
     if (context.isPan) {
-      this.dispatcher('panend', {
+      this.dispatcher.dispatch('panend', {
         startX: context.startX,
         startY: context.startY,
         clientX: point.clientX,
@@ -213,7 +213,7 @@ export class Recognizer {
   
   cancel(point, context) {
     clearTimeout(context.handler);
-    this.dispatcher('cancel', {});
+    this.dispatcher.dispatch('cancel', {});
   }
 }
 
