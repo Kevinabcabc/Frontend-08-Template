@@ -23,17 +23,19 @@ export class Carousel extends Component {
     }
 
     let position = 0;
+    let t = Date.now();
+    let ax = 0;
     let children = this.root.children;
+
+    let handler = null;
 
     enableGesture(this.root);
     const timeline = new TimeLine();
     timeline.start();
 
     this.root.addEventListener('pan', (event) => {
-      let x = event.clientX - event.startX;
-
+      let x = event.clientX - event.startX - ax;
       let current = position - ((x - x % 500) / 500);
-
       for (const offset of [-1, 0, 1]) {
         let pos = current + offset;
         pos = (pos % children.length + children.length) % children.length;
@@ -42,27 +44,64 @@ export class Carousel extends Component {
       }
     });
 
-    this.root.addEventListener('panend', (event) => {
-      let x = event.clientX - event.startX;
-      position = position - Math.round(x / 500);
+    this.root.addEventListener('end', (event) => {
+      timeline.reset();
+      timeline.start();
+      handler = setInterval(nextPicture, 2000);
 
-      for (const offset of [0, -Math.sign(Math.round(x / 500) - x + 250 * Math.sign(x))]) {
-        let pos = position + offset;
+      let x = event.clientX - event.startX - ax;
+      
+      let current = position - ((x - x % 500) / 500);
+      let direction = Math.round((x % 500)/500);
+
+      if (event.isFlick) {
+        console.log('flick ', event.velocity);
+        if (event.velocity < 0) {
+          direction = Math.ceil((x % 500)/500);
+        } else {
+          direction = Math.floor((x % 500)/500);
+        }
+      }
+
+      for (const offset of [-1, 0, 1]) {
+        let pos = current + offset;
         pos = (pos % children.length + children.length) % children.length;
-        children[pos].style.transition = '';
-        children[pos].style.transform = `translateX(${- pos * 500 + offset * 500}px)`;
+
+        children[pos].style.transition = 'none';
+        timeline.add(new Animation(children[pos].style, "transform",
+        - pos * 500 + offset * 500 + x % 500,
+        - pos * 500 + offset * 500 + direction * 500, 500, 0, ease, v => `translateX(${v}px)`))
+      }
+      console.log('ppppp1', position);
+
+      position = position - ((x - x % 500) / 500) - direction;
+      position = (position % children.length + children.length) % children.length;
+      console.log('ppppp2', position);
+    });
+
+    this.root.addEventListener('start', (event) => {
+      console.log('start');
+      timeline.pause();
+      clearInterval(handler);
+      if (Date.now() - t < 500) {
+        let progress = (Date.now() - t)/500;
+        ax = ease(progress) * 500 - 500;
+      } else {
+        ax = 0;
       }
     });
 
-    setInterval(() => {
-      let nextIndex = (position + 1) % children.length;
+    let nextPicture = () => {
+      let nextPosition = (position + 1) % children.length;
       let current = children[position];
-      let next = children[nextIndex];
+      let next = children[nextPosition];
+      t = Date.now();
 
       timeline.add(new Animation(current.style, "transform", - position * 500, -500 - position * 500, 500, 0, ease, v => `translateX(${v}px)`))
-      timeline.add(new Animation(next.style, "transform", 500 - nextIndex * 500, - nextIndex * 500, 500, 0, ease, v => `translateX(${v}px)`))
-      position = nextIndex;
-    }, 2000);
+      timeline.add(new Animation(next.style, "transform", 500 - nextPosition * 500, - nextPosition * 500, 500, 0, ease, v => `translateX(${v}px)`))
+      position = nextPosition;
+    }
+    handler = setInterval(nextPicture, 2000);
 
 
 
