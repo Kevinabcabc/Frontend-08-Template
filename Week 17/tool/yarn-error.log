@@ -1,0 +1,50 @@
+Arguments: 
+  /usr/local/bin/node /usr/local/bin/yarn add yeoman -g
+
+PATH: 
+  /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+
+Yarn version: 
+  1.22.0
+
+Node version: 
+  12.14.1
+
+Platform: 
+  darwin x64
+
+Trace: 
+  Error: http://github.com/yeoman/generators/archive/0.9.5.tar.gz: Request failed "404 Not Found"
+      at ResponseError.ExtendableBuiltin (/usr/local/lib/node_modules/yarn/lib/cli.js:696:66)
+      at new ResponseError (/usr/local/lib/node_modules/yarn/lib/cli.js:802:124)
+      at Request.<anonymous> (/usr/local/lib/node_modules/yarn/lib/cli.js:67045:16)
+      at Request.emit (events.js:223:5)
+      at Request.module.exports.Request.onRequestResponse (/usr/local/lib/node_modules/yarn/lib/cli.js:141604:10)
+      at ClientRequest.emit (events.js:223:5)
+      at HTTPParser.parserOnIncomingClient [as onIncoming] (_http_client.js:583:27)
+      at HTTPParser.parserOnHeadersComplete (_http_common.js:115:17)
+      at TLSSocket.socketOnData (_http_client.js:456:22)
+      at TLSSocket.emit (events.js:223:5)
+
+npm manifest: 
+  {
+    "name": "generator-tool",
+    "version": "1.0.0",
+    "description": "",
+    "main": "generators/app/index.js",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+      "yeoman-generator": "^5.2.0"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

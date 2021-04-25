@@ -1,0 +1,23 @@
+{
+  "name": "lll",
+  "version": "1.0.0",
+  "description": "",
+  "main": "generators/app/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "copy-webpack-plugin": "^6.0.0",
+    "css-loader": "*",
+    "vue-loader": "^15.0.0",
+    "vue-style-loader": "^4.0.0",
+    "vue-template-compiler": "^2.0.0",
+    "webpack": "^4"
+  },
+  "dependencies": {
+    "vue": "^2.0.0"
+  }
+}
