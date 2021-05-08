@@ -1,126 +1,10 @@
 const EOF = Symbol('EOF');
-const css = require('css');
-
-const {layout} = require('./layout.js');
 
 let currentToken = null;
 let currentAttribute = null;
 let currentTextNode = null;
 
 let stack = [{type: 'document', children: []}];
-let rules = [];
-const addCSSRules = (text) => {
-  var ast = css.parse(text);
-
-  rules.push(...ast.stylesheet.rules);
-}
-
-
-const specificity = (selector) => {
-  let p = [0,0,0,0];
-  let selectorParts = selector.split(" ");
-  for (let part of selectorParts) {
-    if (part.charAt(0) === '#') {
-      p[1] += 1;
-    } else if (part.charAt(0) === '.') {
-      p[2] += 1;
-    } else {
-      p[3] += 1;
-    }
-  }
-  return p;
-}
-// [0,1,1,1], [0,2,0,0] -1
-const compare = (sp1, sp2) => {
-  if (sp1[0] - sp2[0]) {
-    return sp1[0] - sp2[0];
-  }
-  if (sp1[1] - sp2[1]) {
-    return sp1[1] - sp2[1];
-  }
-  if (sp1[2] - sp2[2]) {
-    return sp1[2] - sp2[2];
-  }
-
-  return sp1[3] - sp2[3];
-}
-
-const match = (element, selector) => {
-  // console.log(1, selector, element);
-  if (!selector || !element.attributes) {
-    return false;
-  }
-
-  if (selector.charAt(0) === '#') {
-    let attr = element.attributes.filter(attr => attr.name === 'id')[0];
-    if (attr && attr.value === selector.replace('#', '')) {
-      return true
-    }
-  } else if (selector.charAt(0) === '.') {
-    let attr = element.attributes.filter(attr => attr.name === 'class')[0];
-    if (attr && attr.value === selector.replace('.', '')) {
-      return true
-    }
-  } else {
-    if (element.tagName === selector) {
-      return true;
-    }
-  }
-  return false;
-}
-
-const computeCSS = (element) => {
-  // console.log(rules);
-  // console.log("compute css with rules", element);
-  // .slice() 不传参数拷贝
-  let elements = stack.slice().reverse();
-
-  if (!element.computedStyle) {
-    element.computedStyle = {};
-  }
-
-  for (const rule of rules) {
-    let selectorParts = rule.selectors[0].split(' ').reverse();
-    if (!match(element, selectorParts[0])) {
-      continue;
-    }
-    let matched = false;
-    let j = 1;
-
-    for (let i = 0; i < elements.length; i++) {
-      if (match(elements[i], selectorParts[j])) {
-        j++;
-      }
-    }
-
-    if (j >= selectorParts.length) {
-      matched = true;
-    }
-
-    if (matched) {
-      // 匹配到
-      // console.log(9999, element, rule);
-      let computedStyle = element.computedStyle;
-      let sp = specificity(rule.selectors[0]);
-      // console.log('sp', rule.selectors[0], sp);
-      for (let declaration of rule.declarations) {
-        if (!computedStyle[declaration.property]) {
-          computedStyle[declaration.property] = {};
-        }
-
-        if (!computedStyle[declaration.property].specificity) {
-             computedStyle[declaration.property].value = declaration.value;
-             computedStyle[declaration.property].specificity = sp;
-        } else if (compare(computedStyle[declaration.property].specificity, sp) < 0) {
-          computedStyle[declaration.property].value = declaration.value;
-          computedStyle[declaration.property].specificity = sp;
-        }
-
-      }
-    }
-    // console.log(11, element.computedStyle);
-  }
-}
 
 const emit = (token) => {
   // console.log('token:', token);
@@ -141,22 +25,20 @@ const emit = (token) => {
         });
       }
     }
-    computeCSS(element);
+    // computeCSS(element);
     top.children.push(element);
     // element.parent = top;
-
     if (!token.isSelfClosing) {
       stack.push(element);
     }
     currentTextNode = null;
-
   } else if ( token.type === 'endTag') {
     if (top.tagName !== token.tagName) {
       throw new Error("tag start end not match")
     } else {
       /// 添加css 操作
       if (top.tagName === 'style') {
-        addCSSRules(top.children[0].content);
+        // addCSSRules(top.children[0].content);
       }
       // layout(top);
       stack.pop();
@@ -369,7 +251,7 @@ const tagOpen = (c) => {
     }
     return tagName(c);
   } else {
-    return ;
+    return data;
   }
 }
 
@@ -391,17 +273,22 @@ function data(c) {
   }
 }
 
-const parseHTML = (html) => {
+export const parseHTML = (html) => {
   // console.log('----', html, data);
-  let state = data;
+  stack = [{type: 'document', children: []}];
+  currentToken = null;
+  currentAttribute = null;
+  currentTextNode = null;
 
+  stack = [{type: 'document', children: []}];
+
+  let state = data;
+  // console.log(11, state);
   for (const c of html) {
     state = state(c);
   }
 
   state = state(EOF);
-  // console.log(555, stack[0], 666, stack[0].children[0].children[1].children[5]);
+  // console.log(999, stack[0], 666, stack[0].children[0].children[1].children[5]);
   return stack[0];
 }
-
-module.exports.parseHTML = parseHTML;
