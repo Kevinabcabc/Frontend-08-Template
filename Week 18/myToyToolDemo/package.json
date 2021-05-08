@@ -1,0 +1,34 @@
+{
+  "name": "demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "generators/app/index.js",
+  "scripts": {
+    "build": "webpack",
+    "test": "mocha --require @babel/register",
+    "coverage": "nyc mocha --require @babel/register"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.14.0",
+    "@babel/preset-env": "^7.14.1",
+    "@babel/register": "^7.13.16",
+    "@istanbuljs/nyc-config-babel": "^3.0.0",
+    "babel-loader": "^8.2.2",
+    "babel-plugin-istanbul": "^6.0.0",
+    "copy-webpack-plugin": "^6.0.0",
+    "css-loader": "*",
+    "mocha": "^8.4.0",
+    "nyc": "^15.1.0",
+    "vue-loader": "^15.0.0",
+    "vue-style-loader": "^4.0.0",
+    "vue-template-compiler": "^2.0.0",
+    "webpack": "^4",
+    "webpack-cli": "3.3.12"
+  },
+  "dependencies": {
+    "vue": "^2.0.0"
+  }
+}
