@@ -1,0 +1,14 @@
+{
+  "name": "public-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "publish": "scp -r -P 8022 -r ./* peijun@127.0.0.1:/home/peijun/publish-server",
+    "start": "node ./server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
