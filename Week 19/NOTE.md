@@ -13,6 +13,6 @@
 scp -P 8022 -r ./* peijun@127.0.0.1:/home/peijun/server
 
 
-
+认真完成了作业 并将发布系统完成并部署在阿里云服务器上(CentOS);
 
 存在问题 阿里云服务器种获取token 和user info 接口时常出错
